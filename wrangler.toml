@@ -1,3 +1,8 @@
-name = "sveltia-cms-auth"
+name = "cms-auth"
 main = "src/index.js"
 compatibility_date = "2023-03-24"
+
+# Preview URLs are disabled. They would give this authenticator additional
+# hostnames that can mint GitHub tokens with write access to the content
+# repository, and nothing here needs them.
+preview_urls = false
