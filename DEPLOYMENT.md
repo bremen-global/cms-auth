@@ -33,13 +33,21 @@ content repository. Nothing here needs them.
 
 ## Required environment variables
 
-Set on the Worker (Settings > Variables), never in this repo:
+**Where each one lives is not a matter of taste.** Workers Builds deploys this
+repo with `npx wrangler deploy`, and wrangler treats `wrangler.toml` as the source
+of truth for `vars` — so a plain-text variable set only in the dashboard is erased
+by the next build. Secrets are preserved ("Secrets not included in the file are
+preserved from the previous version"), plain-text vars are not.
 
-| Variable | Notes |
-|---|---|
-| `GITHUB_CLIENT_ID` | From the OAuth App owned by the `bremen-global` GitHub org |
-| `GITHUB_CLIENT_SECRET` | Same app. **Encrypt it.** |
-| `ALLOWED_DOMAINS` | `bremen-global.de,*.bremen-global.de` |
+| Variable | Where | Why there |
+|---|---|---|
+| `ALLOWED_DOMAINS` | `wrangler.toml` `[vars]` | Must survive every deploy; see below. Public hostnames, nothing to hide. |
+| `GITHUB_CLIENT_ID` | Dashboard **Secret** | Not actually sensitive, but stored as a secret so it survives deploys without publishing an account-specific value in this public fork. |
+| `GITHUB_CLIENT_SECRET` | Dashboard **Secret** | Genuinely sensitive. Never in this repo. |
+
+Do **not** add `GITHUB_CLIENT_ID` as a Text variable: it will disappear on the
+next build, and the Worker will answer `MISCONFIGURED_CLIENT`. That happened once
+already.
 
 **`ALLOWED_DOMAINS` is mandatory, not optional.** Upstream's README calls it
 "optional but recommended", which understates it. In `src/index.js` the
@@ -47,11 +55,12 @@ server-side origin check is guarded by `domainPatterns.length` (~line 191), and 
 is the client-side one that decides whether to post the token to the opener
 (~line 134). With the variable empty **both checks are skipped**, and the popup
 hands the access token to whatever origin messaged it — so any website could
-collect a token with write access to `bremen-global/website`. Set it in the same
-save as the client secret; never set the credentials and come back to it later.
+collect a token with write access to `bremen-global/website`.
 
-The value deliberately excludes `bremen-global.pages.dev`: CMS sign-in works on
-the real hostname only.
+That is exactly why it belongs in this file rather than the dashboard. A dashboard
+value disappears silently on the next build while the secrets survive, which
+leaves a *fully working* relay with its origin check switched off — the worst of
+the possible states, and one nothing would alert on.
 
 ## The OAuth App
 

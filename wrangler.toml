@@ -6,3 +6,22 @@ compatibility_date = "2023-03-24"
 # hostnames that can mint GitHub tokens with write access to the content
 # repository, and nothing here needs them.
 preview_urls = false
+
+# ALLOWED_DOMAINS lives here, NOT in the dashboard.
+#
+# Workers Builds deploys this repo with `npx wrangler deploy`, and wrangler
+# treats this file as the source of truth for `vars` — so a plain-text variable
+# set only in the dashboard is erased by the next build. That was observed, not
+# assumed: the variables were saved in the dashboard, a build ran, and the Worker
+# came back reporting MISCONFIGURED_CLIENT with no domain patterns.
+#
+# For this variable that failure mode is dangerous rather than merely annoying.
+# Secrets ARE preserved across deploys, so had the client ID been a secret,
+# ALLOWED_DOMAINS would have vanished on its own and left a fully working relay
+# that hands a GitHub token with write access to any origin that asks — see the
+# guards at src/index.js:134 and :191, both skipped when the list is empty.
+#
+# These are our own public hostnames, so there is nothing here to keep private.
+# bremen-global.pages.dev is deliberately absent: sign in on the real hostname.
+[vars]
+ALLOWED_DOMAINS = "bremen-global.de,*.bremen-global.de"
