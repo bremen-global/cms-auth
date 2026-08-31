@@ -64,10 +64,25 @@ the possible states, and one nothing would alert on.
 
 ## The OAuth App
 
-Owned by the **GitHub organisation**, not an individual account, so it survives
-handover: <https://github.com/organizations/bremen-global/settings/applications>.
-Its *Authorization callback URL* must be exactly
-`https://cms-auth.it-954.workers.dev/callback`.
+Owned by the **GitHub organisation**, not an individual account:
+<https://github.com/organizations/bremen-global/settings/applications>. Its
+*Authorization callback URL* must be exactly
+`https://cms-auth.it-954.workers.dev/callback` — pointing it at the CMS instead of
+the Worker sends the authorization code to a page that cannot exchange it, and the
+Worker's `/callback` never runs.
+
+**Org ownership is load-bearing, not just tidiness for handover.** The
+organisation's *Third-party application access policy* is set to **Access
+restricted**, and its own wording is the reason this works: "Only approved
+applications can access data in this organization. Applications owned by
+`bremen-global` always have access."
+
+So an app registered at `github.com/settings/applications/new` — the personal form
+that upstream's README links — would be third-party to this org and **every
+editor's sign-in would be blocked pending approval**. If this app is ever
+regenerated, register it under the organisation again. The restriction itself is
+worth keeping: any other OAuth app a member authorises needs an owner's approval,
+while this one does not.
 
 ## Keeping up with upstream
 
